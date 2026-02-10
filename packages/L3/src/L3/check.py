@@ -61,5 +61,5 @@ def check_term(
         case Store():
             pass
 
-        case Begin():  # pragma: no cover
+        case Begin():  # pragma: no branch
             pass
