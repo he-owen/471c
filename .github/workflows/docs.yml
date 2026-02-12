@@ -26,8 +26,8 @@ jobs:
       - name: Sync dependencies
         run: uv sync --all-extras --all-packages
 
-      -name: Build documentation
-       run: uv run pdoc -o docs packages/*
+      - name: Build documentation
+        run: uv run pdoc -o docs packages/*
 
       - uses: actions/upload-pages-artifact@v4
         with:
