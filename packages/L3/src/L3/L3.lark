@@ -1,3 +1,5 @@
+%ignore /[\s]+/
+
 program     : "(" PROGRAM "(" parameters ")" term ")"
 parameters  : IDENTIFIER*
 
@@ -16,15 +18,33 @@ term        : let
 
 
 let         : "(" LET "(" bindings ")" term ")"
-
 letrec      : "(" LETREC "(" bindings ")" term ")"
+reference   : IDENTIFIER
+abstract    : "(" LAMBDA "(" parameters ")" term ")"
+immediate   : INTEGER
+primitive   : "(" PRIMITIVE_OP term term ")"
+branch      : "(" IF "(" CMP_OP term term ")" term term ")"
+allocate    : "(" ALLOCATE term ")"
+load        : "(" LOAD term term ")"
+store       : "(" STORE term term term ")"
+begin       : "(" BEGIN term+ ")"
+apply       : "(" term term* ")"
 
 bindings    : binding*
-binding     : IDENTIFIER term
+binding     : "(" IDENTIFIER term ")"
 
 PROGRAM.2   : "l3"
 LET.2       : "let"
 LETREC.2    : "letrec"
 LAMBDA.2    : "\\" | "lambda" | "λ"
+IF.2        : "if"
+ALLOCATE.2  : "allocate"
+LOAD.2      : "load"
+STORE.2     : "store"
+BEGIN.2     : "begin"
+
+PRIMITIVE_OP : "+" | "-" | "*"
+CMP_OP      : "<" | "=="
 
 IDENTIFIER  : /[a-zA-Z_][a-zA-Z0-9_]*/
+INTEGER     : /0|[1-9][0-9]*/
