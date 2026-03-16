@@ -236,7 +236,7 @@ def test_eliminate_letrec_program():
 
 
 # Let Tests
-def test_eliminate_letrec_term_let():
+def test_eliminate_letrec_term_let_immediate_binding():
     term = L3.Let(
         bindings=[
             ("x", L3.Immediate(value=0)),
@@ -299,7 +299,7 @@ def test_eliminate_letrec_term_let_shadows_letrec_context():
 
 
 # LetRec Tests
-def test_eliminate_letrec_term_letrec():
+def test_eliminate_letrec_term_letrec_single_binding():
     term = L3.LetRec(
         bindings=[("f", L3.Immediate(value=42))],
         body=L3.Reference(name="f"),
@@ -365,7 +365,7 @@ def test_eliminate_letrec_term_letrec_self_reference():
     assert actual == expected
 
 # Reference Tests
-def test_eliminate_letrec_term_reference():
+def test_eliminate_letrec_term_reference_no_context():
     term = L3.Reference(name="x")
 
     context: Context = {}
@@ -385,7 +385,7 @@ def test_eliminate_letrec_term_reference_recursive():
 
 
 # Abstract Tests
-def test_eliminate_letrec_term_abstract():
+def test_eliminate_letrec_term_abstract_no_context():
     term = L3.Abstract(
         parameters=["x"],
         body=L3.Reference(name="x"),
@@ -438,7 +438,7 @@ def test_eliminate_letrec_term_abstract_preserves_outer_context():
 
 
 # Apply Tests
-def test_eliminate_letrec_term_apply():
+def test_eliminate_letrec_term_apply_with_context():
     term = L3.Apply(
         target=L3.Reference(name="f"),
         arguments=[L3.Immediate(value=1), L3.Immediate(value=2)],
@@ -474,7 +474,7 @@ def test_eliminate_letrec_term_apply_no_arguments():
 
 
 # Immediate Tests
-def test_eliminate_letrec_term_immediate():
+def test_eliminate_letrec_term_immediate_value():
     term = L3.Immediate(value=42)
 
     context: Context = {}
@@ -485,7 +485,7 @@ def test_eliminate_letrec_term_immediate():
 
 
 # Primitive Tests
-def test_eliminate_letrec_term_primitive():
+def test_eliminate_letrec_term_primitive_no_context():
     term = L3.Primitive(
         operator="+",
         left=L3.Immediate(value=1),
@@ -525,7 +525,7 @@ def test_eliminate_letrec_term_primitive_with_recursive_ref():
 
 
 # Branch Tests
-def test_eliminate_letrec_term_branch():
+def test_eliminate_letrec_term_branch_no_context():
     term = L3.Branch(
         operator="<",
         left=L3.Immediate(value=1),
@@ -550,7 +550,7 @@ def test_eliminate_letrec_term_branch():
 
 
 # Allocate Tests
-def test_eliminate_letrec_term_allocate():
+def test_eliminate_letrec_term_allocate_count():
     term = L3.Allocate(count=3)
 
     context: Context = {}
@@ -561,7 +561,7 @@ def test_eliminate_letrec_term_allocate():
 
 
 # Load Tests
-def test_eliminate_letrec_term_load():
+def test_eliminate_letrec_term_load_from_array():
     term = L3.Load(
         base=L3.Reference(name="arr"),
         index=2,
@@ -580,7 +580,7 @@ def test_eliminate_letrec_term_load():
 
 
 # Store Tests
-def test_eliminate_letrec_term_store():
+def test_eliminate_letrec_term_store_to_array():
     term = L3.Store(
         base=L3.Reference(name="arr"),
         index=0,
@@ -601,7 +601,7 @@ def test_eliminate_letrec_term_store():
 
 
 # Begin Tests
-def test_eliminate_letrec_term_begin():
+def test_eliminate_letrec_term_begin_with_effects():
     term = L3.Begin(
         effects=[L3.Immediate(value=0)],
         value=L3.Immediate(value=1),
