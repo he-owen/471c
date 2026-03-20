@@ -16,6 +16,7 @@ from L3.syntax import (
     Store,
 )
 
+
 # Let Tests
 def test_check_term_let():
     term = Let(
@@ -28,6 +29,7 @@ def test_check_term_let():
     context: Context = {}
 
     check_term(term, context)
+
 
 def test_check_term_let_scope():
     term = Let(
@@ -43,6 +45,7 @@ def test_check_term_let_scope():
     with pytest.raises(ValueError):
         check_term(term, context)
 
+
 def test_check_term_let_duplicate_binders():
     term = Let(
         bindings=[
@@ -57,6 +60,7 @@ def test_check_term_let_duplicate_binders():
     with pytest.raises(ValueError):
         check_term(term, context)
 
+
 def test_check_term_let_multiple_bindings():
     term = Let(
         bindings=[
@@ -67,6 +71,7 @@ def test_check_term_let_multiple_bindings():
         body=Reference(name="z"),
     )
     check_term(term, {})
+
 
 def test_check_term_let_binding_fail_sibling():
     term = Let(
@@ -88,6 +93,7 @@ def test_check_term_let_body_null_variable():
     with pytest.raises(ValueError):
         check_term(term, {})
 
+
 def test_check_term_let_more_duplicate_binders():
     term = Let(
         bindings=[
@@ -99,8 +105,6 @@ def test_check_term_let_more_duplicate_binders():
     )
     with pytest.raises(ValueError):
         check_term(term, {})
-
-
 
 
 # Letrec Tests
@@ -144,7 +148,6 @@ def test_check_term_letrec_duplicate_binders():
 
     with pytest.raises(ValueError):
         check_term(term, context)
-
 
 
 def test_check_term_letrec_self_reference():
@@ -197,6 +200,7 @@ def test_check_term_reference_free():
     with pytest.raises(ValueError):
         check_term(term, context)
 
+
 def test_check_term_reference_wrong_name():
     term = Reference(name="xx")
 
@@ -204,7 +208,6 @@ def test_check_term_reference_wrong_name():
         "x": None,
     }
     with pytest.raises(ValueError):
-
         check_term(term, context)
 
 
@@ -219,6 +222,7 @@ def test_check_term_abstract():
 
     check_term(term, context)
 
+
 def test_check_term_abstract_duplicate_parameters():
     term = Abstract(
         parameters=["x", "x"],
@@ -232,30 +236,22 @@ def test_check_term_abstract_duplicate_parameters():
 
 
 def test_check_term_abstract_outer_context():
-    term = Abstract(
-        parameters=["x"],
-        body=Reference(name="outer")
-    )
+    term = Abstract(parameters=["x"], body=Reference(name="outer"))
     check_term(term, {"outer": None})
 
 
 def test_check_term_abstract_null_variable_in_body():
-    term = Abstract(
-        parameters=["x"],
-        body=Reference(name="y")
-    )
+    term = Abstract(parameters=["x"], body=Reference(name="y"))
 
     with pytest.raises(ValueError):
         check_term(term, {})
 
 
 def test_check_term_abstract_no_parameters():
-    term = Abstract(
-        parameters=[],
-        body=Immediate(value=0)
-    )
+    term = Abstract(parameters=[], body=Immediate(value=0))
 
     check_term(term, {})
+
 
 # Apply Tests
 def test_check_term_apply():
@@ -270,20 +266,14 @@ def test_check_term_apply():
 
     check_term(term, context)
 
+
 def test_check_term_apply_no_arguments():
-    term = Apply(
-        target=Reference(name="x"),
-                 arguments=[]
-                 )
+    term = Apply(target=Reference(name="x"), arguments=[])
     check_term(term, {"x": None})
 
 
-
 def test_check_term_apply_null_target():
-    term = Apply(
-        target=Reference(name="x"),
-        arguments=[]
-    )
+    term = Apply(target=Reference(name="x"), arguments=[])
 
     with pytest.raises(ValueError):
         check_term(term, {})
@@ -307,6 +297,7 @@ def test_check_term_immediate():
 
     check_term(term, context)
 
+
 # Primitive Tests
 def test_check_term_primitive():
     term = Primitive(
@@ -319,12 +310,9 @@ def test_check_term_primitive():
 
     check_term(term, context)
 
+
 def test_check_term_primitive_subtraction():
-    term = Primitive(
-        operator="-",
-        left=Immediate(value=3),
-        right=Immediate(value=2)
-    )
+    term = Primitive(operator="-", left=Immediate(value=3), right=Immediate(value=2))
 
     context: Context = {}
 
@@ -332,11 +320,7 @@ def test_check_term_primitive_subtraction():
 
 
 def test_check_term_primitive_multiplication():
-    term = Primitive(
-        operator="*",
-        left=Immediate(value=2),
-        right=Immediate(value=3)
-    )
+    term = Primitive(operator="*", left=Immediate(value=2), right=Immediate(value=3))
 
     context: Context = {}
 
@@ -344,11 +328,7 @@ def test_check_term_primitive_multiplication():
 
 
 def test_check_term_primitive_null_left():
-    term = Primitive(
-        operator="+",
-        left=Reference(name="x"),
-        right=Immediate(value=1)
-    )
+    term = Primitive(operator="+", left=Reference(name="x"), right=Immediate(value=1))
 
     context: Context = {}
 
@@ -357,11 +337,7 @@ def test_check_term_primitive_null_left():
 
 
 def test_check_term_primitive_null_right():
-    term = Primitive(
-        operator="+",
-        left=Immediate(value=1),
-        right=Reference(name="x")
-    )
+    term = Primitive(operator="+", left=Immediate(value=1), right=Reference(name="x"))
 
     context: Context = {}
 
@@ -372,11 +348,7 @@ def test_check_term_primitive_null_right():
 def test_check_term_primitive_nested():
     term = Primitive(
         operator="+",
-        left=Primitive(
-            operator="*",
-            left=Immediate(value=2),
-            right=Immediate(value=3)
-        ),
+        left=Primitive(operator="*", left=Immediate(value=2), right=Immediate(value=3)),
         right=Immediate(value=1),
     )
     check_term(term, {})
@@ -396,6 +368,7 @@ def test_check_term_branch():
 
     check_term(term, context)
 
+
 def test_check_term_branch_not_less():
     term = Branch(
         operator="<",
@@ -408,6 +381,7 @@ def test_check_term_branch_not_less():
     context: Context = {}
 
     check_term(term, context)
+
 
 def test_check_term_branch_equal():
     term = Branch(
@@ -422,6 +396,7 @@ def test_check_term_branch_equal():
 
     check_term(term, context)
 
+
 def test_check_term_branch_not_equal():
     term = Branch(
         operator="==",
@@ -435,6 +410,7 @@ def test_check_term_branch_not_equal():
 
     check_term(term, context)
 
+
 def test_check_term_branch_null_right():
     term = Branch(
         operator="<",
@@ -446,6 +422,7 @@ def test_check_term_branch_null_right():
     with pytest.raises(ValueError):
         check_term(term, {})
 
+
 # Allocate Tests
 def test_check_term_allocate():
     term = Allocate(count=0)
@@ -454,12 +431,11 @@ def test_check_term_allocate():
 
     check_term(term, context)
 
+
 def test_check_term_allocate_with_context():
     term = Allocate(count=0)
 
-    context: Context = {
-        "x": None
-    }
+    context: Context = {"x": None}
     check_term(term, context)
 
 
@@ -478,10 +454,7 @@ def test_check_term_load():
 
 
 def test_check_term_load_free_base():
-    term = Load(
-        base=Reference(name="missing"),
-        index=0
-    )
+    term = Load(base=Reference(name="missing"), index=0)
 
     context: Context = {}
 
@@ -502,6 +475,7 @@ def test_check_term_store():
     }
 
     check_term(term, context)
+
 
 def test_check_term_store_invalid_context():
     term = Store(
@@ -529,10 +503,9 @@ def test_check_term_begin():
 
     check_term(term, context)
 
+
 def test_check_term_begin_empty_effects():
-    term = Begin(
-        effects=[], value=Immediate(value=0)
-    )
+    term = Begin(effects=[], value=Immediate(value=0))
     check_term(term, {})
 
 
@@ -552,6 +525,7 @@ def test_check_term_begin_null_value():
     )
     with pytest.raises(ValueError):
         check_term(term, {})
+
 
 # Program Tests
 def test_check_program():
@@ -573,27 +547,20 @@ def test_check_program_duplicate_parameters():
         check_program(program)
 
 
-
 def test_check_program_one_parameter():
-    program = Program(
-        parameters=["x"], body=Reference(name="x")
-    )
+    program = Program(parameters=["x"], body=Reference(name="x"))
 
     check_program(program)
 
 
-
 def test_check_program_null_variable_in_body():
-    program = Program(
-        parameters=["x"], body=Reference(name="null")
-    )
+    program = Program(parameters=["x"], body=Reference(name="null"))
 
     with pytest.raises(ValueError):
         check_program(program)
 
+
 def test_check_program_empty_parameters():
-    program = Program(
-        parameters=[], body=Immediate(value=0)
-    )
+    program = Program(parameters=[], body=Immediate(value=0))
 
     check_program(program)

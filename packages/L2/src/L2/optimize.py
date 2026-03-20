@@ -50,9 +50,7 @@ def free_variables(term: Term) -> set[str]:
             return free_variables(left) | free_variables(right)
 
         case Branch(left=left, right=right, consequent=consequent, otherwise=otherwise):
-            return (
-                free_variables(left) | free_variables(right) | free_variables(consequent) | free_variables(otherwise)
-            )
+            return free_variables(left) | free_variables(right) | free_variables(consequent) | free_variables(otherwise)
 
         case Load(base=base):
             return free_variables(base)

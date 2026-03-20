@@ -257,6 +257,7 @@ def test_eliminate_letrec_term_let_immediate_binding():
 
     assert actual == expected
 
+
 def test_eliminate_letrec_term_let_multiple_bindings():
     term = L3.Let(
         bindings=[
@@ -279,6 +280,7 @@ def test_eliminate_letrec_term_let_multiple_bindings():
     actual = eliminate_letrec_term(term, context)
 
     assert actual == expected
+
 
 def test_eliminate_letrec_term_let_shadows_letrec_context():
     term = L3.Let(
@@ -321,16 +323,20 @@ def test_eliminate_letrec_term_letrec_single_binding():
 
     assert actual == expected
 
+
 def test_eliminate_letrec_term_letrec_self_reference():
     term = L3.LetRec(
         bindings=[
-            ("f", L3.Abstract(
-                parameters=["x"],
-                body=L3.Apply(
-                    target=L3.Reference(name="f"),
-                    arguments=[L3.Reference(name="x")],
+            (
+                "f",
+                L3.Abstract(
+                    parameters=["x"],
+                    body=L3.Apply(
+                        target=L3.Reference(name="f"),
+                        arguments=[L3.Reference(name="x")],
+                    ),
                 ),
-            )),
+            ),
         ],
         body=L3.Apply(target=L3.Reference(name="f"), arguments=[L3.Immediate(value=0)]),
     )
@@ -364,6 +370,7 @@ def test_eliminate_letrec_term_letrec_self_reference():
 
     assert actual == expected
 
+
 # Reference Tests
 def test_eliminate_letrec_term_reference_no_context():
     term = L3.Reference(name="x")
@@ -373,6 +380,7 @@ def test_eliminate_letrec_term_reference_no_context():
     actual = eliminate_letrec_term(term, context)
 
     assert actual == L2.Reference(name="x")
+
 
 def test_eliminate_letrec_term_reference_recursive():
     term = L3.Reference(name="x")
@@ -402,6 +410,7 @@ def test_eliminate_letrec_term_abstract_no_context():
 
     assert actual == expected
 
+
 def test_eliminate_letrec_term_abstract_shadows_context():
     term = L3.Abstract(
         parameters=["x"],
@@ -418,6 +427,7 @@ def test_eliminate_letrec_term_abstract_shadows_context():
     actual = eliminate_letrec_term(term, context)
 
     assert actual == expected
+
 
 def test_eliminate_letrec_term_abstract_preserves_outer_context():
     term = L3.Abstract(
@@ -454,6 +464,7 @@ def test_eliminate_letrec_term_apply_with_context():
     actual = eliminate_letrec_term(term, context)
 
     assert actual == expected
+
 
 def test_eliminate_letrec_term_apply_no_arguments():
     term = L3.Apply(
@@ -503,6 +514,7 @@ def test_eliminate_letrec_term_primitive_no_context():
     actual = eliminate_letrec_term(term, context)
 
     assert actual == expected
+
 
 def test_eliminate_letrec_term_primitive_with_recursive_ref():
     term = L3.Primitive(
@@ -618,6 +630,7 @@ def test_eliminate_letrec_term_begin_with_effects():
 
     assert actual == expected
 
+
 def test_eliminate_letrec_term_begin_empty_effects():
     term = L3.Begin(
         effects=[],
@@ -651,6 +664,7 @@ def test_eliminate_letrec_program_immediate():
     actual = eliminate_letrec_program(program)
 
     assert actual == expected
+
 
 def test_eliminate_letrec_program_with_params():
     program = L3.Program(
