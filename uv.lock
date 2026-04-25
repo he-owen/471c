@@ -183,12 +183,14 @@ name = "l1"
 version = "0.1.0"
 source = { editable = "packages/L1" }
 dependencies = [
+    { name = "l0" },
     { name = "pydantic" },
     { name = "util" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "l0", editable = "packages/L0" },
     { name = "pydantic", specifier = ">=2.12.3" },
     { name = "util", editable = "packages/util" },
 ]

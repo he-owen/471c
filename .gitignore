@@ -13,3 +13,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local LaTeX / proposal (not versioned)
+proposal.aux
+proposal.log
+proposal.out
+proposal.pdf
+proposal.tex
