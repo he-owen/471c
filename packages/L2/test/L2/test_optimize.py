@@ -9,9 +9,12 @@ from L2.syntax import (
     Let,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
 )
 
 
@@ -72,6 +75,20 @@ def test_free_variables_store():
     assert free_variables(Store(base=Reference(name="x"), index=0, value=Reference(name="v"))) == {"x", "v"}
 
 
+def test_free_variables_string_literal():
+    assert free_variables(StringLiteral(value="hello")) == set()
+
+
+def test_free_variables_string_length():
+    term = StringLength(value=Reference(name="x"))
+    assert free_variables(term) == {"x"}
+
+
+def test_free_variables_print():
+    term = Print(value=Reference(name="x"))
+    assert free_variables(term) == {"x"}
+
+
 def test_free_variables_begin():
     term = Begin(effects=[Reference(name="x")], value=Reference(name="y"))
     assert free_variables(term) == {"x", "y"}
@@ -124,6 +141,16 @@ def test_optimize_term_store():
     assert optimize_term(term, env) == Store(base=Reference(name="arr"), index=0, value=Immediate(value=1))
 
 
+def test_optimize_term_print():
+    term = Print(value=Reference(name="x"))
+    env: Environment = {"x": Immediate(value=42)}
+
+    actual = optimize_term(term, env)
+
+    expected = Print(value=Immediate(value=42))
+    assert actual == expected
+
+
 def test_optimize_term_begin():
     term = Begin(effects=[Reference(name="x")], value=Reference(name="y"))
     env: Environment = {"x": Immediate(value=1)}
@@ -170,6 +197,49 @@ def test_fold_mul():
     assert optimize_term(term, {}) == Immediate(value=15)
 
 
+def test_fold_div():
+    term = Primitive(operator="/", left=Immediate(value=10), right=Immediate(value=3))
+    assert optimize_term(term, {}) == Immediate(value=3)
+
+
+def test_fold_mod():
+    term = Primitive(operator="%", left=Immediate(value=10), right=Immediate(value=3))
+    assert optimize_term(term, {}) == Immediate(value=1)
+
+
+def test_fold_string_ref():
+    term = Primitive(operator="string-ref", left=StringLiteral(value="hello"), right=Immediate(value=0))
+    assert optimize_term(term, {}) == Immediate(value=104)
+
+
+def test_fold_string_append():
+    term = Primitive(
+        operator="string-append",
+        left=StringLiteral(value="hello"),
+        right=StringLiteral(value=" world"),
+    )
+    assert optimize_term(term, {}) == StringLiteral(value="hello world")
+
+
+def test_fold_string_length():
+    term = StringLength(value=StringLiteral(value="hello"))
+    assert optimize_term(term, {}) == Immediate(value=5)
+
+
+def test_no_fold_string_length():
+    term = StringLength(value=Reference(name="x"))
+    assert optimize_term(term, {}) == term
+
+
+def test_optimize_term_string_literal():
+    assert optimize_term(StringLiteral(value="hello"), {}) == StringLiteral(value="hello")
+
+
+def test_no_fold_string_ref_with_immediates():
+    term = Primitive(operator="string-ref", left=Immediate(value=5), right=Immediate(value=0))
+    assert optimize_term(term, {}) == term
+
+
 def test_no_fold_primitive():
     term = Primitive(operator="+", left=Reference(name="x"), right=Immediate(value=1))
     assert optimize_term(term, {}) == term
@@ -213,6 +283,72 @@ def test_fold_branch_eq_false():
         operator="==",
         left=Immediate(value=3),
         right=Immediate(value=4),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=20)
+
+
+def test_fold_branch_gt_true():
+    term = Branch(
+        operator=">",
+        left=Immediate(value=5),
+        right=Immediate(value=1),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=10)
+
+
+def test_fold_branch_gt_false():
+    term = Branch(
+        operator=">",
+        left=Immediate(value=1),
+        right=Immediate(value=5),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=20)
+
+
+def test_fold_branch_gte_true():
+    term = Branch(
+        operator=">=",
+        left=Immediate(value=5),
+        right=Immediate(value=5),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=10)
+
+
+def test_fold_branch_lte_true():
+    term = Branch(
+        operator="<=",
+        left=Immediate(value=3),
+        right=Immediate(value=5),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=10)
+
+
+def test_fold_branch_neq_true():
+    term = Branch(
+        operator="!=",
+        left=Immediate(value=3),
+        right=Immediate(value=5),
+        consequent=Immediate(value=10),
+        otherwise=Immediate(value=20),
+    )
+    assert optimize_term(term, {}) == Immediate(value=10)
+
+
+def test_fold_branch_neq_false():
+    term = Branch(
+        operator="!=",
+        left=Immediate(value=3),
+        right=Immediate(value=3),
         consequent=Immediate(value=10),
         otherwise=Immediate(value=20),
     )

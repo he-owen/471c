@@ -13,9 +13,11 @@ from .syntax import (
     Immediate,
     Load,
     Primitive,
+    Print,
     Program,
     Statement,
     Store,
+    StringLength,
 )
 
 
@@ -47,6 +49,12 @@ def free_variables(statement: Statement) -> set[str]:
 
         case Store(base=base, value=value, then=then):
             return {base, value} | free_variables(then)
+
+        case Print(destination=destination, value=value, then=then):
+            return {value} | (free_variables(then) - {destination})
+
+        case StringLength(destination=destination, value=value, then=then):
+            return {value} | (free_variables(then) - {destination})
 
         case Halt(value=value):  # pragma: no branch
             return {value}
@@ -127,6 +135,12 @@ def close_statement(
 
         case Store(base=base, index=index, value=value, then=then):
             return L0.Store(base=base, index=index, value=value, then=_statement(then))
+
+        case Print(destination=destination, value=value, then=then):
+            return L0.Print(destination=destination, value=value, then=_statement(then))
+
+        case StringLength(destination=destination, value=value, then=then):
+            return L0.StringLength(destination=destination, value=value, then=_statement(then))
 
         case Halt(value=value):  # pragma: no branch
             return L0.Halt(value=value)

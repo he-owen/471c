@@ -14,7 +14,7 @@ class Program(BaseModel, frozen=True):
 
 
 type Statement = Annotated[
-    Copy | Abstract | Apply | Immediate | Primitive | Branch | Allocate | Load | Store | Halt,
+    Copy | Abstract | Apply | Immediate | Primitive | Branch | Allocate | Load | Store | Halt | Print | StringLength,
     Field(discriminator="tag"),
 ]
 
@@ -43,14 +43,14 @@ class Apply(BaseModel, frozen=True):
 class Immediate(BaseModel, frozen=True):
     tag: Literal["immediate"] = "immediate"
     destination: Identifier
-    value: int
+    value: int | str
     then: Statement
 
 
 class Primitive(BaseModel, frozen=True):
     tag: Literal["primitive"] = "primitive"
     destination: Identifier
-    operator: Literal["+", "-", "*"]
+    operator: Literal["+", "-", "*", "/", "%", "string-ref", "string-append"]
     left: Identifier
     right: Identifier
     then: Statement
@@ -58,7 +58,7 @@ class Primitive(BaseModel, frozen=True):
 
 class Branch(BaseModel, frozen=True):
     tag: Literal["branch"] = "branch"
-    operator: Literal["<", "=="]
+    operator: Literal["<", "==", ">", ">=", "<=", "!="]
     left: Identifier
     right: Identifier
     then: Statement
@@ -84,6 +84,20 @@ class Store(BaseModel, frozen=True):
     tag: Literal["store"] = "store"
     base: Identifier
     index: Nat
+    value: Identifier
+    then: Statement
+
+
+class Print(BaseModel, frozen=True):
+    tag: Literal["print"] = "print"
+    destination: Identifier
+    value: Identifier
+    then: Statement
+
+
+class StringLength(BaseModel, frozen=True):
+    tag: Literal["string_length"] = "string_length"
+    destination: Identifier
     value: Identifier
     then: Statement
 

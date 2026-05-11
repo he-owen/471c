@@ -11,9 +11,12 @@ from L3.syntax import (
     LetRec,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
 )
 
 
@@ -558,6 +561,35 @@ def test_check_program_null_variable_in_body():
 
     with pytest.raises(ValueError):
         check_program(program)
+
+
+def test_check_term_print():
+    term = Print(value=Reference(name="x"))
+    context: Context = {"x": None}
+
+    check_term(term, context)
+
+
+def test_check_term_print_unbound():
+    term = Print(value=Reference(name="x"))
+    context: Context = {}
+
+    with pytest.raises(ValueError):
+        check_term(term, context)
+
+
+def test_check_term_string_literal():
+    term = StringLiteral(value="hello")
+    context: Context = {}
+
+    check_term(term, context)
+
+
+def test_check_term_string_length():
+    term = StringLength(value=Reference(name="x"))
+    context: Context = {"x": None}
+
+    check_term(term, context)
 
 
 def test_check_program_empty_parameters():

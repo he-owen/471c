@@ -96,6 +96,15 @@ def eliminate_letrec_term(
                 value=recur(value),
             )
 
+        case L3.Print(value=value):
+            return L2.Print(value=recur(value))
+
+        case L3.StringLiteral(value=value):
+            return L2.StringLiteral(value=value)
+
+        case L3.StringLength(value=value):
+            return L2.StringLength(value=recur(value))
+
         case L3.Begin(effects=effects, value=value):  # pragma: no branch
             return L2.Begin(
                 effects=[recur(effect) for effect in effects],

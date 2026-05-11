@@ -13,9 +13,11 @@ from .syntax import (
     Immediate,
     Load,
     Primitive,
+    Print,
     Program,
     Statement,
     Store,
+    StringLength,
 )
 
 
@@ -69,12 +71,34 @@ def to_ast_statement(
             match operator:
                 case "+":
                     op = ast.Add()
-
                 case "-":
                     op = ast.Sub()
-
-                case "*":  # pragma: no branch
+                case "*":
                     op = ast.Mult()
+                case "/":
+                    op = ast.FloorDiv()
+                case "%":
+                    op = ast.Mod()
+                case "string-append":
+                    op = ast.Add()
+
+                case "string-ref":
+                    return [
+                        ast.Assign(
+                            targets=[store(destination)],
+                            value=ast.Call(
+                                func=ast.Name(id="ord", ctx=ast.Load()),
+                                args=[
+                                    ast.Subscript(
+                                        value=load(left),
+                                        slice=load(right),
+                                        ctx=ast.Load(),
+                                    )
+                                ],
+                            ),
+                        ),
+                        *_statement(then),
+                    ]
 
             return [
                 ast.Assign(
@@ -89,8 +113,20 @@ def to_ast_statement(
                 case "<":
                     op = ast.Lt()
 
-                case "==":  # pragma: no branch
+                case "==":
                     op = ast.Eq()
+
+                case ">":
+                    op = ast.Gt()
+
+                case ">=":
+                    op = ast.GtE()
+
+                case "<=":
+                    op = ast.LtE()
+
+                case "!=":  # pragma: no branch
+                    op = ast.NotEq()
 
             return [
                 ast.If(
@@ -137,6 +173,30 @@ def to_ast_statement(
                     ],
                     value=load(value),
                 ),
+                *_statement(then),
+            ]
+
+        case StringLength(destination=destination, value=value, then=then):
+            return [
+                ast.Assign(
+                    targets=[store(destination)],
+                    value=ast.Call(
+                        func=ast.Name(id="len", ctx=ast.Load()),
+                        args=[load(value)],
+                    ),
+                ),
+                *_statement(then),
+            ]
+
+        case Print(destination=destination, value=value, then=then):
+            return [
+                ast.Expr(
+                    value=ast.Call(
+                        func=ast.Name(id="print", ctx=ast.Load()),
+                        args=[load(value)],
+                    ),
+                ),
+                ast.Assign(targets=[store(destination)], value=ast.Constant(value=0)),
                 *_statement(then),
             ]
 

@@ -14,9 +14,12 @@ from .syntax import (
     LetRec,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
     Term,
 )
 
@@ -88,6 +91,15 @@ def uniqify_term(
 
         case Store(base=base, index=index, value=value):
             return Store(base=_term(base), index=index, value=_term(value))
+
+        case Print(value=value):
+            return Print(value=_term(value))
+
+        case StringLiteral():
+            return term
+
+        case StringLength(value=value):
+            return StringLength(value=_term(value))
 
         case Begin(effects=effects, value=value):  # pragma: no branch
             return Begin(

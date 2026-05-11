@@ -12,18 +12,21 @@ from .syntax import (
     Let,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
     Term,
 )
 
-type Environment = Mapping[Identifier, Immediate | Reference]
+type Environment = Mapping[Identifier, Immediate | Reference | StringLiteral]
 
 
 def free_variables(term: Term) -> set[str]:
     match term:
-        case Immediate() | Allocate():
+        case Immediate() | Allocate() | StringLiteral():
             return set()
 
         case Reference(name=name):
@@ -58,6 +61,12 @@ def free_variables(term: Term) -> set[str]:
         case Store(base=base, value=value):
             return free_variables(base) | free_variables(value)
 
+        case Print(value=value):
+            return free_variables(value)
+
+        case StringLength(value=value):
+            return free_variables(value)
+
         case Begin(effects=effects, value=value):  # pragma: no branch
             result = free_variables(value)
             for effect in effects:
@@ -75,6 +84,9 @@ def optimize_term(
         case Immediate():
             return term
 
+        case StringLiteral():
+            return term
+
         case Reference(name=name):
             if name in env:
                 return env[name]
@@ -87,7 +99,7 @@ def optimize_term(
             for name, value in bindings:
                 opt_value = optimize_term(value, new_env)
                 match opt_value:
-                    case Immediate() | Reference():
+                    case Immediate() | Reference() | StringLiteral():
                         new_env[name] = opt_value
                     case _:
                         pass
@@ -131,8 +143,18 @@ def optimize_term(
                         return Immediate(value=opt_left.value + opt_right.value)
                     case "-":
                         return Immediate(value=opt_left.value - opt_right.value)
-                    case "*":  # pragma: no branch
+                    case "*":
                         return Immediate(value=opt_left.value * opt_right.value)
+                    case "/":
+                        return Immediate(value=opt_left.value // opt_right.value)
+                    case "%":
+                        return Immediate(value=opt_left.value % opt_right.value)
+
+            if isinstance(opt_left, StringLiteral) and isinstance(opt_right, Immediate) and operator == "string-ref":
+                return Immediate(value=ord(opt_left.value[opt_right.value]))
+
+            if isinstance(opt_left, StringLiteral) and isinstance(opt_right, StringLiteral) and operator == "string-append":
+                return StringLiteral(value=opt_left.value + opt_right.value)
 
             return Primitive(operator=operator, left=opt_left, right=opt_right)
 
@@ -144,8 +166,16 @@ def optimize_term(
                 match operator:
                     case "<":
                         condition = opt_left.value < opt_right.value
-                    case "==":  # pragma: no branch
+                    case "==":
                         condition = opt_left.value == opt_right.value
+                    case ">":
+                        condition = opt_left.value > opt_right.value
+                    case ">=":
+                        condition = opt_left.value >= opt_right.value
+                    case "<=":
+                        condition = opt_left.value <= opt_right.value
+                    case "!=":  # pragma: no branch
+                        condition = opt_left.value != opt_right.value
 
                 if condition:
                     return recur(consequent)
@@ -171,6 +201,15 @@ def optimize_term(
                 index=index,
                 value=recur(value),
             )
+
+        case Print(value=value):
+            return Print(value=recur(value))
+
+        case StringLength(value=value):
+            opt_value = recur(value)
+            if isinstance(opt_value, StringLiteral):
+                return Immediate(value=len(opt_value.value))
+            return StringLength(value=opt_value)
 
         case Begin(effects=effects, value=value):  # pragma: no branch
             return Begin(

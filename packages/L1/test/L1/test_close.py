@@ -7,6 +7,16 @@ from util.sequential_name_generator import SequentialNameGenerator
 # free_variables tests
 
 
+def test_free_variables_print():
+    statement = L1.Print(destination="t", value="x", then=L1.Halt(value="t"))
+    assert free_variables(statement) == {"x"}
+
+
+def test_free_variables_string_length():
+    statement = L1.StringLength(destination="t", value="x", then=L1.Halt(value="t"))
+    assert free_variables(statement) == {"x"}
+
+
 def test_free_variables_copy():
     statement = L1.Copy(destination="x", source="y", then=L1.Halt(value="x"))
     assert free_variables(statement) == {"y"}
@@ -175,6 +185,28 @@ def test_close_statement_store():
     actual = close_statement(statement, fresh, procedures)
 
     expected = L0.Store(base="arr", index=0, value="v", then=L0.Halt(value="arr"))
+    assert actual == expected
+
+
+def test_close_statement_print():
+    statement = L1.Print(destination="t", value="x", then=L1.Halt(value="t"))
+
+    fresh = SequentialNameGenerator()
+    procedures: list[L0.Procedure] = []
+    actual = close_statement(statement, fresh, procedures)
+
+    expected = L0.Print(destination="t", value="x", then=L0.Halt(value="t"))
+    assert actual == expected
+
+
+def test_close_statement_string_length():
+    statement = L1.StringLength(destination="t", value="x", then=L1.Halt(value="t"))
+
+    fresh = SequentialNameGenerator()
+    procedures: list[L0.Procedure] = []
+    actual = close_statement(statement, fresh, procedures)
+
+    expected = L0.StringLength(destination="t", value="x", then=L0.Halt(value="t"))
     assert actual == expected
 
 

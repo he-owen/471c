@@ -9,9 +9,12 @@ from L3.syntax import (
     LetRec,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
 )
 from L3.uniqify import Context, uniqify_program, uniqify_term
 from util.sequential_name_generator import SequentialNameGenerator
@@ -495,6 +498,42 @@ def test_uniqify_program_no_parameters():
         parameters=[],
         body=Immediate(value=42),
     )
+
+    assert actual == expected
+
+
+def test_uniqify_term_print():
+    term = Print(value=Reference(name="x"))
+
+    context: Context = {"x": "x0"}
+    fresh = SequentialNameGenerator()
+    actual = uniqify_term(term, context, fresh=fresh)
+
+    expected = Print(value=Reference(name="x0"))
+
+    assert actual == expected
+
+
+def test_uniqify_term_string_literal():
+    term = StringLiteral(value="hello")
+
+    context: Context = {}
+    fresh = SequentialNameGenerator()
+    actual = uniqify_term(term, context, fresh=fresh)
+
+    expected = StringLiteral(value="hello")
+
+    assert actual == expected
+
+
+def test_uniqify_term_string_length():
+    term = StringLength(value=Reference(name="x"))
+
+    context: Context = {"x": "x0"}
+    fresh = SequentialNameGenerator()
+    actual = uniqify_term(term, context, fresh=fresh)
+
+    expected = StringLength(value=Reference(name="x0"))
 
     assert actual == expected
 

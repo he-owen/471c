@@ -14,9 +14,12 @@ from .syntax import (
     LetRec,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
     Term,
 )
 
@@ -94,6 +97,15 @@ def check_term(
 
         case Store(base=base, index=_index, value=value):
             recur(base)
+            recur(value)
+
+        case Print(value=value):
+            recur(value)
+
+        case StringLiteral():
+            pass
+
+        case StringLength(value=value):
             recur(value)
 
         case Begin(effects=effects, value=value):  # pragma: no branch

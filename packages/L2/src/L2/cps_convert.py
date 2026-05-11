@@ -121,6 +121,18 @@ def cps_convert_term(
                 ),
             )
 
+        case L2.Print(value=value):
+            t = fresh("t")
+            return _term(value, lambda vid: L1.Print(destination=t, value=vid, then=k(t)))
+
+        case L2.StringLiteral(value=value):
+            t = fresh("t")
+            return L1.Immediate(destination=t, value=value, then=k(t))
+
+        case L2.StringLength(value=value):
+            t = fresh("t")
+            return _term(value, lambda vid: L1.StringLength(destination=t, value=vid, then=k(t)))
+
         case L2.Begin(effects=effects, value=value):  # pragma: no branch
             return _terms([*effects, value], lambda ids: k(ids[-1]))
 

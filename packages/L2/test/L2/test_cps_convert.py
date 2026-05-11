@@ -319,6 +319,70 @@ def test_cps_convert_term_begin_empty_effects():
     assert actual == expected
 
 
+def test_cps_convert_term_string_literal():
+    term = L2.StringLiteral(value="hello")
+
+    fresh = SequentialNameGenerator()
+    actual = cps_convert_term(term, k, fresh)
+
+    expected = L1.Immediate(
+        destination="t0",
+        value="hello",
+        then=L1.Halt(value="t0"),
+    )
+
+    assert actual == expected
+
+
+def test_cps_convert_term_string_length():
+    term = L2.StringLength(value=L2.Reference(name="x"))
+
+    fresh = SequentialNameGenerator()
+    actual = cps_convert_term(term, k, fresh)
+
+    expected = L1.StringLength(
+        destination="t0",
+        value="x",
+        then=L1.Halt(value="t0"),
+    )
+
+    assert actual == expected
+
+
+def test_cps_convert_term_print():
+    term = L2.Print(value=L2.Reference(name="x"))
+
+    fresh = SequentialNameGenerator()
+    actual = cps_convert_term(term, k, fresh)
+
+    expected = L1.Print(
+        destination="t0",
+        value="x",
+        then=L1.Halt(value="t0"),
+    )
+
+    assert actual == expected
+
+
+def test_cps_convert_term_print_immediate():
+    term = L2.Print(value=L2.Immediate(value=42))
+
+    fresh = SequentialNameGenerator()
+    actual = cps_convert_term(term, k, fresh)
+
+    expected = L1.Immediate(
+        destination="t1",
+        value=42,
+        then=L1.Print(
+            destination="t0",
+            value="t1",
+            then=L1.Halt(value="t0"),
+        ),
+    )
+
+    assert actual == expected
+
+
 def test_cps_convert_program():
     program = L2.Program(
         parameters=["x"],

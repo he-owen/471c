@@ -7,18 +7,26 @@ from lark.visitors import v_args  # pyright: ignore[reportUnknownVariableType]
 from .syntax import (
     Abstract,
     Allocate,
+    And,
     Apply,
     Begin,
+    Bool,
     Branch,
     Identifier,
+    If,
     Immediate,
     Let,
     LetRec,
     Load,
+    Not,
+    Or,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
     Term,
 )
 
@@ -150,6 +158,67 @@ class AstTransformer(Transformer[Token, Program | Term]):
         value: Term,
     ) -> Store:
         return Store(base=base, index=index_term.value, value=value)
+
+    def bool_true(self, children: Sequence[Token]) -> Bool:
+        return Bool(value=True)
+
+    def bool_false(self, children: Sequence[Token]) -> Bool:
+        return Bool(value=False)
+
+    @v_args(inline=True)
+    def and_expr(
+        self,
+        _and: Token,
+        left: Term,
+        right: Term,
+    ) -> And:
+        return And(left=left, right=right)
+
+    @v_args(inline=True)
+    def or_expr(
+        self,
+        _or: Token,
+        left: Term,
+        right: Term,
+    ) -> Or:
+        return Or(left=left, right=right)
+
+    @v_args(inline=True)
+    def not_expr(
+        self,
+        _not: Token,
+        value: Term,
+    ) -> Not:
+        return Not(value=value)
+
+    def string_literal(self, children: Sequence[Token]) -> StringLiteral:
+        return StringLiteral(value=children[0].value[1:-1])
+
+    @v_args(inline=True)
+    def string_length(
+        self,
+        _string_length: Token,
+        value: Term,
+    ) -> StringLength:
+        return StringLength(value=value)
+
+    @v_args(inline=True)
+    def print_expr(
+        self,
+        _print: Token,
+        value: Term,
+    ) -> Print:
+        return Print(value=value)
+
+    @v_args(inline=True)
+    def if_term(
+        self,
+        _if: Token,
+        condition: Term,
+        consequent: Term,
+        otherwise: Term,
+    ) -> If:
+        return If(condition=condition, consequent=consequent, otherwise=otherwise)
 
     def begin(self, children: Sequence[Term | Token]) -> Begin:
         terms = [c for c in children if not isinstance(c, Token)]

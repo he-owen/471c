@@ -666,6 +666,39 @@ def test_eliminate_letrec_program_immediate():
     assert actual == expected
 
 
+def test_eliminate_letrec_term_print():
+    term = L3.Print(value=L3.Reference(name="x"))
+
+    context: Context = {}
+    actual = eliminate_letrec_term(term, context)
+
+    expected = L2.Print(value=L2.Reference(name="x"))
+
+    assert actual == expected
+
+
+def test_eliminate_letrec_term_string_literal():
+    term = L3.StringLiteral(value="hello")
+
+    context: Context = {}
+    actual = eliminate_letrec_term(term, context)
+
+    expected = L2.StringLiteral(value="hello")
+
+    assert actual == expected
+
+
+def test_eliminate_letrec_term_string_length():
+    term = L3.StringLength(value=L3.Reference(name="x"))
+
+    context: Context = {}
+    actual = eliminate_letrec_term(term, context)
+
+    expected = L2.StringLength(value=L2.Reference(name="x"))
+
+    assert actual == expected
+
+
 def test_eliminate_letrec_program_with_params():
     program = L3.Program(
         parameters=["x", "y"],

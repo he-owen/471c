@@ -13,9 +13,12 @@ from .syntax import (
     Let,
     Load,
     Primitive,
+    Print,
     Program,
     Reference,
     Store,
+    StringLength,
+    StringLiteral,
     Term,
 )
 
@@ -64,12 +67,28 @@ def to_ast_term(
             match operator:
                 case "+":
                     op = ast.Add()
-
                 case "-":
                     op = ast.Sub()
-
-                case "*":  # pragma: no branch
+                case "*":
                     op = ast.Mult()
+                case "/":
+                    op = ast.FloorDiv()
+                case "%":
+                    op = ast.Mod()
+                case "string-append":
+                    op = ast.Add()
+
+                case "string-ref":
+                    return ast.Call(
+                        func=ast.Name(id="ord", ctx=ast.Load()),
+                        args=[
+                            ast.Subscript(
+                                value=_term(left),
+                                slice=_term(right),
+                                ctx=ast.Load(),
+                            )
+                        ],
+                    )
 
             return ast.BinOp(left=_term(left), op=op, right=_term(right))
 
@@ -78,8 +97,20 @@ def to_ast_term(
                 case "<":
                     op = ast.Lt()
 
-                case "==":  # pragma: no branch
+                case "==":
                     op = ast.Eq()
+
+                case ">":
+                    op = ast.Gt()
+
+                case ">=":
+                    op = ast.GtE()
+
+                case "<=":
+                    op = ast.LtE()
+
+                case "!=":  # pragma: no branch
+                    op = ast.NotEq()
 
             return ast.IfExp(
                 test=ast.Compare(left=_term(left), ops=[op], comparators=[_term(right)]),
@@ -106,6 +137,31 @@ def to_ast_term(
                         ast.Call(
                             func=ast.Attribute(value=_term(base), attr="__setitem__", ctx=ast.Load()),
                             args=[ast.Constant(value=index), _term(value)],
+                        ),
+                        ast.Constant(value=0),
+                    ],
+                    ctx=ast.Load(),
+                ),
+                slice=ast.Constant(-1),
+                ctx=ast.Load(),
+            )
+
+        case StringLiteral(value=value):
+            return ast.Constant(value=value)
+
+        case StringLength(value=value):
+            return ast.Call(
+                func=ast.Name(id="len", ctx=ast.Load()),
+                args=[_term(value)],
+            )
+
+        case Print(value=value):
+            return ast.Subscript(
+                value=ast.Tuple(
+                    elts=[
+                        ast.Call(
+                            func=ast.Name(id="print", ctx=ast.Load()),
+                            args=[_term(value)],
                         ),
                         ast.Constant(value=0),
                     ],
