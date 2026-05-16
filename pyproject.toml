@@ -46,4 +46,4 @@ addopts = [
 ]
 
 [tool.coverage.run]
-omit = ["**/__init__.py", "**/test/**"]
+omit = ["**/__init__.py", "**/test/**", "**/playground/**"]

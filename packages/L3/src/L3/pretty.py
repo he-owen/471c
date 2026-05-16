@@ -46,16 +46,16 @@ def pretty_term(term: Term, indent: int = 0) -> str:
             return f"{pad}{'#t' if value else '#f'}"
 
         case Primitive(operator=op, left=left, right=right):
-            l = pretty_term(left, 0)
-            r = pretty_term(right, 0)
-            return f"{pad}({op} {l} {r})"
+            lhs = pretty_term(left, 0)
+            rhs = pretty_term(right, 0)
+            return f"{pad}({op} {lhs} {rhs})"
 
         case Branch(operator=op, left=left, right=right, consequent=con, otherwise=alt):
-            l = pretty_term(left, 0)
-            r = pretty_term(right, 0)
+            lhs = pretty_term(left, 0)
+            rhs = pretty_term(right, 0)
             c = pretty_term(con, indent + 2)
             a = pretty_term(alt, indent + 2)
-            return f"{pad}(if ({op} {l} {r})\n{c}\n{a})"
+            return f"{pad}(if ({op} {lhs} {rhs})\n{c}\n{a})"
 
         case If(condition=cond, consequent=con, otherwise=alt):
             cd = pretty_term(cond, 0)
@@ -64,14 +64,14 @@ def pretty_term(term: Term, indent: int = 0) -> str:
             return f"{pad}(if {cd}\n{c}\n{a})"
 
         case And(left=left, right=right):
-            l = pretty_term(left, 0)
-            r = pretty_term(right, 0)
-            return f"{pad}(and {l} {r})"
+            lhs = pretty_term(left, 0)
+            rhs = pretty_term(right, 0)
+            return f"{pad}(and {lhs} {rhs})"
 
         case Or(left=left, right=right):
-            l = pretty_term(left, 0)
-            r = pretty_term(right, 0)
-            return f"{pad}(or {l} {r})"
+            lhs = pretty_term(left, 0)
+            rhs = pretty_term(right, 0)
+            return f"{pad}(or {lhs} {rhs})"
 
         case Not(value=value):
             v = pretty_term(value, 0)
