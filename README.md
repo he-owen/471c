@@ -1,6 +1,6 @@
 # Status
 
-[![.github/workflows/ci.yml](https://github.com/clause/471c/actions/workflows/ci.yml/badge.svg)](https://github.com/he-owen/471c/actions/workflows/ci.yml)
+[![.github/workflows/ci.yml](https://github.com/he-owen/471c/actions/workflows/ci.yml/badge.svg)](https://github.com/he-owen/471c/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/he-owen/471c/branch/main/graph/badge.svg)](https://codecov.io/gh/he-owen/471c)
 
 # Playground
