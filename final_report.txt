@@ -1,0 +1,47 @@
+1. Group Members
+   Owen He
+
+2. Repository
+   https://github.com/he-owen/471c
+
+3. Deviations from Proposal
+   All extensions were completed as outlined in the proposal with two exceptions:
+
+   - Playground implementation: The proposal mentioned an interactive web
+     environment but the feedback suggested translating the language to a
+     web-accessible target. 
+     
+     Instead, I kept the existing Python code
+     generation backend and built a Flask web app that compiles L3 programs
+     server-side and executes the generated Python in a subprocess. The
+     frontend sends code to the backend API, which runs the full compiler
+     pipeline and returns the output along with each intermediate
+     representation.
+
+   - Pretty printers: I added S-expression pretty printers for L3, L2, and
+     L1 that were not in the original proposal. These were needed for the
+     IR Explorer feature in the playground so users can see readable
+     representations of each compilation stage.
+
+   Everything else (additional operators, booleans, print, strings) was
+   implemented exactly as proposed.
+
+4. Reflection
+   The main thing I learned from this course is that compilers are built in
+   many small layers, each doing one specific transformation. What looks
+   like a simple program actually goes through many phases that can include
+   parsing, desugaring, semantic checks, alpha-renaming, letrec elimination, 
+   optimization, CPS conversion, and finally code generation. Each pass simplifies 
+   the program into a lower representation until it can be directly translated to 
+   the target.
+
+   Implementing the extensions taught me how changes propagate through a
+   pipeline. Adding something like strings or booleans isn't just a parser
+   change, you have to think about how it flows through every stage.
+   Booleans ended up being pure desugaring (no downstream changes needed),
+   while strings touched every single phase from parsing to codegen.
+
+   Building the playground also showed me the value of having each compiler
+   phase be a pure function that takes an AST and returns an AST. Because
+   the pipeline was structured that way, I could capture every intermediate
+   result and display it without modifying any of the existing compiler code.
