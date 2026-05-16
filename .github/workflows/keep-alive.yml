@@ -1,0 +1,14 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '3,17,31,48 * * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait random delay
+        run: sleep $((RANDOM % 120))
+      - name: Ping
+        run: curl -s https://four71c.onrender.com > /dev/null
