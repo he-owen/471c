@@ -30,6 +30,7 @@ l3 = { workspace = true }
 l2 = { workspace = true }
 l1 = { workspace = true }
 l0 = { workspace = true }
+playground = { workspace = true }
 
 [tool.pytest.ini_options]
 addopts = [

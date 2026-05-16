@@ -1,0 +1,12 @@
+[project]
+name = "playground"
+version = "0.1.0"
+description = "Interactive web playground for the L3 compiler"
+requires-python = ">=3.14"
+dependencies = ["flask>=3.1.0", "gunicorn>=23.0.0", "L3", "L2", "L1", "util"]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+playground = "playground.app:main"

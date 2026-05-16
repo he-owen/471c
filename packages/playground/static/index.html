@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L3 Playground</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #fafafa;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .toolbar select, .toolbar button, .toolbar input {
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+        .toolbar button {
+            background: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .toolbar button:hover {
+            background: #357abd;
+        }
+        .main-layout {
+            display: flex;
+            gap: 15px;
+        }
+        .editor-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #code-editor {
+            width: 100%;
+            height: 350px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            resize: vertical;
+            box-sizing: border-box;
+            tab-size: 2;
+        }
+        .cm-editor {
+            border: 1px solid #ccc;
+            height: 350px;
+            font-size: 14px;
+        }
+        .cm-editor .cm-scroller {
+            overflow: auto;
+        }
+        .args-row {
+            margin-top: 8px;
+        }
+        .args-row label {
+            font-size: 13px;
+            margin-right: 5px;
+        }
+        .args-row input {
+            font-family: monospace;
+            font-size: 13px;
+            padding: 4px 8px;
+            width: 200px;
+            border: 1px solid #ccc;
+        }
+        .output-panel {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 10px;
+            min-height: 80px;
+        }
+        .output-panel h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+        .output-panel pre {
+            margin: 0;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .output-panel pre.error {
+            color: #c00;
+        }
+        .ir-panel {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+        .ir-tabs {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .ir-tabs button {
+            font-size: 12px;
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 3px 3px 0 0;
+        }
+        .ir-tabs button.active {
+            background: white;
+            border-bottom-color: white;
+            font-weight: bold;
+        }
+        .ir-toggle {
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .ir-toggle label {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .ir-content {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #eee;
+            padding: 8px;
+            background: #f9f9f9;
+        }
+        .ir-content pre {
+            margin: 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>L3 Playground</h1>
+    <div class="toolbar">
+        <label for="examples">Examples:</label>
+        <select id="examples">
+            <option value="">-- Select --</option>
+        </select>
+        <button id="run-btn">Run</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="editor-panel">
+            <textarea id="code-editor">(l3 () 42)</textarea>
+            <div class="args-row">
+                <label for="args-input">Arguments:</label>
+                <input type="text" id="args-input" placeholder="e.g. 5 10">
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="output-panel">
+                <h3>Output</h3>
+                <pre id="output"></pre>
+            </div>
+
+            <div class="ir-panel">
+                <div class="ir-tabs" id="ir-tabs">
+                    <button data-stage="l3_parsed" class="active">L3 Parsed</button>
+                    <button data-stage="l3_desugared">L3 Desugared</button>
+                    <button data-stage="l2">L2</button>
+                    <button data-stage="l2_optimized">L2 Optimized</button>
+                    <button data-stage="l1">L1 (CPS)</button>
+                    <button data-stage="python">Python</button>
+                </div>
+                <div class="ir-toggle">
+                    <label><input type="radio" name="ir-format" value="sexp" checked> Pretty</label>
+                    <label><input type="radio" name="ir-format" value="json"> JSON</label>
+                </div>
+                <div class="ir-content">
+                    <pre id="ir-output"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentStages = {};
+        var currentTab = 'l3_parsed';
+        var examples = {};
+
+        var editorAPI = {
+            getValue: function() {
+                return document.getElementById('code-editor').value;
+            },
+            setValue: function(v) {
+                document.getElementById('code-editor').value = v;
+            }
+        };
+
+        fetch('/api/examples')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                examples = data;
+                var select = document.getElementById('examples');
+                Object.keys(data).forEach(function(name) {
+                    var opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
+            });
+
+        document.getElementById('examples').addEventListener('change', function() {
+            var ex = examples[this.value];
+            if (ex) {
+                editorAPI.setValue(ex.code);
+                document.getElementById('args-input').value = ex.args.join(' ');
+            }
+        });
+
+        document.getElementById('run-btn').addEventListener('click', function() {
+            var code = editorAPI.getValue();
+            var argsStr = document.getElementById('args-input').value.trim();
+            var args = [];
+            if (argsStr) {
+                args = argsStr.split(/\s+/).map(function(a) {
+                    var n = Number(a);
+                    return isNaN(n) ? a : n;
+                });
+            }
+
+            var outputEl = document.getElementById('output');
+            outputEl.textContent = 'Running...';
+            outputEl.className = '';
+
+            fetch('/api/run', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({code: code, args: args}),
+            })
+            .then(function(resp) { return resp.json(); })
+            .then(function(data) {
+                currentStages = data.stages || {};
+
+                if (data.error) {
+                    outputEl.textContent = data.error;
+                    outputEl.className = 'error';
+                } else {
+                    outputEl.textContent = data.output || '(no output)';
+                    outputEl.className = '';
+                }
+
+                updateIR();
+            })
+            .catch(function(e) {
+                outputEl.textContent = 'Request failed: ' + e.message;
+                outputEl.className = 'error';
+            });
+        });
+
+        document.getElementById('ir-tabs').addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') {
+                var buttons = document.querySelectorAll('#ir-tabs button');
+                for (var i = 0; i < buttons.length; i++) {
+                    buttons[i].classList.remove('active');
+                }
+                e.target.classList.add('active');
+                currentTab = e.target.dataset.stage;
+                updateIR();
+            }
+        });
+
+        var radios = document.querySelectorAll('input[name="ir-format"]');
+        for (var i = 0; i < radios.length; i++) {
+            radios[i].addEventListener('change', updateIR);
+        }
+
+        function updateIR() {
+            var irOutput = document.getElementById('ir-output');
+            var format = document.querySelector('input[name="ir-format"]:checked').value;
+            var stage = currentStages[currentTab];
+
+            if (!stage) {
+                irOutput.textContent = '(not available - run the program first)';
+                return;
+            }
+
+            if (currentTab === 'python') {
+                irOutput.textContent = stage;
+            } else if (format === 'sexp') {
+                irOutput.textContent = stage.sexp || '';
+            } else {
+                irOutput.textContent = JSON.stringify(stage.json, null, 2);
+            }
+        }
+    </script>
+
+    <script type="module">
+        import {EditorView, basicSetup} from 'https://esm.sh/codemirror';
+        import {EditorState} from 'https://esm.sh/@codemirror/state';
+
+        var textarea = document.getElementById('code-editor');
+
+        var cmEditor = new EditorView({
+            state: EditorState.create({
+                doc: textarea.value,
+                extensions: [basicSetup],
+            }),
+            parent: textarea.parentNode,
+        });
+
+        textarea.style.display = 'none';
+
+        editorAPI.getValue = function() {
+            return cmEditor.state.doc.toString();
+        };
+        editorAPI.setValue = function(v) {
+            cmEditor.dispatch({
+                changes: {from: 0, to: cmEditor.state.doc.length, insert: v}
+            });
+        };
+    </script>
+</body>
+</html>

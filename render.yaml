@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: l3-playground
+    runtime: python
+    buildCommand: pip install uv && uv sync --all-packages
+    startCommand: uv run gunicorn playground.app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: PYTHON_VERSION
+        value: "3.14"
