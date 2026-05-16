@@ -3,6 +3,19 @@
 [![.github/workflows/ci.yml](https://github.com/clause/471c/actions/workflows/ci.yml/badge.svg)](https://github.com/he-owen/471c/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/he-owen/471c/branch/main/graph/badge.svg)](https://codecov.io/gh/he-owen/471c)
 
+# Playground
+
+Live: https://four71c.onrender.com/
+
+To run locally:
+
+```bash
+uv sync --all-packages
+uv run playground
+```
+
+Then open http://localhost:5000
+
 # Contributing 
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
